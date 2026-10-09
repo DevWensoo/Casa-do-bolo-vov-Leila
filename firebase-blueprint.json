@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "Store": {
+      "title": "Store",
+      "description": "Bakery store unit location",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "number": { "type": "number" },
+        "name": { "type": "string", "maxLength": 100 },
+        "address": { "type": "string", "maxLength": 200 },
+        "city": { "type": "string", "maxLength": 100 },
+        "hours": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["Aberta", "Fechada"] },
+        "phone": { "type": "string", "maxLength": 30 },
+        "staffPin": { "type": "string", "maxLength": 10 },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "number", "name", "address", "city", "status", "phone"]
+    },
+    "Cake": {
+      "title": "Cake",
+      "description": "Artisanal cake item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "enum": ["caseiros", "especiais", "cobertura", "confeitados", "pote", "todos"] },
+        "categoryLabel": { "type": "string", "maxLength": 60 },
+        "price": { "type": "number" },
+        "weight": { "type": "string", "maxLength": 40 },
+        "servings": { "type": "string", "maxLength": 60 },
+        "description": { "type": "string", "maxLength": 500 },
+        "image": { "type": "string", "maxLength": 1000 },
+        "available": { "type": "boolean" },
+        "bakingStatus": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["id", "title", "category", "price", "image", "available"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order placed for a store unit",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "maxLength": 30 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "customerPhone": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "deliveryMode": { "type": "string", "enum": ["pickup", "delivery"] },
+        "paymentMethod": { "type": "string", "enum": ["pix", "card", "cash"] },
+        "cashChange": { "type": "string", "maxLength": 50 },
+        "storeId": { "type": "string", "maxLength": 64 },
+        "storeName": { "type": "string", "maxLength": 100 },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "total": { "type": "number" },
+        "totalCakes": { "type": "number" },
+        "status": { "type": "string", "enum": ["novos", "preparo", "pronto", "finalizado", "cancelado"] },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "date": { "type": "string", "maxLength": 20 }
+      },
+      "required": ["orderNumber", "customerName", "customerPhone", "storeId", "status", "total", "createdAt"]
+    },
+    "StoreInventory": {
+      "title": "StoreInventory",
+      "description": "Stock count and availability for a cake in a specific store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "storeId": { "type": "string", "maxLength": 64 },
+        "cakeId": { "type": "string", "maxLength": 64 },
+        "cakeTitle": { "type": "string", "maxLength": 120 },
+        "stockCount": { "type": "number" },
+        "isAvailable": { "type": "boolean" },
+        "bakingStatus": { "type": "string", "maxLength": 60 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "storeId", "cakeId", "isAvailable", "stockCount"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Administrative settings and security pins",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "masterPin": { "type": "string", "maxLength": 20 },
+        "ownerEmail": { "type": "string", "maxLength": 100 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "masterPin"]
+    }
+  },
+  "firestore": {
+    "/stores/{storeId}": {
+      "schema": { "$ref": "#/entities/Store" },
+      "description": "Store locations information and staff credentials"
+    },
+    "/cakes/{cakeId}": {
+      "schema": { "$ref": "#/entities/Cake" },
+      "description": "Artisanal cake menu items"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Orders received by stores"
+    },
+    "/storeInventory/{inventoryId}": {
+      "schema": { "$ref": "#/entities/StoreInventory" },
+      "description": "Daily cake stock and status per store"
+    },
+    "/systemSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/SystemSettings" },
+      "description": "Global settings and master owner access"
+    }
+  }
+}

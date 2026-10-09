@@ -1,0 +1,6 @@
+{
+  "name": "Casa de Bolo Vovó Leila",
+  "description": "Cardápio artesanal, encomendas online, rastreamento de fornada e painel administrativo da Casa de Bolo Vovó Leila em Santo André e Mauá/SP.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

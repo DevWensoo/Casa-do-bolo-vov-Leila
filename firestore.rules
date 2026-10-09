@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // STORES: Publicly readable for customer checkout and store picker; writable for admin/settings
+    match /stores/{storeId} {
+      allow read: if isValidId(storeId);
+      allow create, update: if isValidId(storeId) 
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().status in ['Aberta', 'Fechada']
+        && incoming().phone is string && incoming().phone.size() <= 30;
+      allow delete: if isValidId(storeId);
+    }
+
+    // CAKES: Publicly readable; manageable by store attendants and admin
+    match /cakes/{cakeId} {
+      allow read: if isValidId(cakeId);
+      allow create, update: if isValidId(cakeId)
+        && incoming().title is string && incoming().title.size() <= 120
+        && incoming().price is number && incoming().price >= 0;
+      allow delete: if isValidId(cakeId);
+    }
+
+    // ORDERS: Created by customers; viewed and updated by store attendants and owner
+    match /orders/{orderId} {
+      allow read: if isValidId(orderId);
+      allow create: if isValidId(orderId)
+        && incoming().orderNumber is string && incoming().orderNumber.size() <= 30
+        && incoming().customerName is string && incoming().customerName.size() <= 100
+        && incoming().customerPhone is string && incoming().customerPhone.size() <= 30
+        && incoming().total is number && incoming().total >= 0
+        && incoming().status in ['novos', 'preparo', 'pronto', 'finalizado', 'cancelado'];
+      allow update: if isValidId(orderId)
+        && incoming().status in ['novos', 'preparo', 'pronto', 'finalizado', 'cancelado'];
+      allow delete: if false;
+    }
+
+    // STORE INVENTORY: Stock counts and availability per store
+    match /storeInventory/{inventoryId} {
+      allow read: if isValidId(inventoryId);
+      allow create, update: if isValidId(inventoryId)
+        && incoming().storeId is string && incoming().storeId.size() <= 64
+        && incoming().cakeId is string && incoming().cakeId.size() <= 64
+        && incoming().stockCount is number && incoming().stockCount >= 0
+        && incoming().isAvailable is bool;
+      allow delete: if isValidId(inventoryId);
+    }
+
+    // SYSTEM SETTINGS
+    match /systemSettings/{settingId} {
+      allow read: if isValidId(settingId);
+      allow create, update: if isValidId(settingId)
+        && incoming().masterPin is string && incoming().masterPin.size() <= 20;
+      allow delete: if false;
+    }
+  }
+}
